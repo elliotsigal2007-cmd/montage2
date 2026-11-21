@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Montage Games</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f1ff;--card:#fff;--tx:#1a1633;--mut:#6b6690;--ac:#7c3aed;--ac2:#db2777;--ok:#059669;--bad:#dc2626;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e0b1f;--card:#1a1633;--tx:#f3f0ff;--mut:#a29ccc;--ac:#a78bfa;--ac2:#f472b6;--ok:#34d399;--bad:#f87171;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e0b1f;--card:#1a1633;--tx:#f3f0ff;--mut:#a29ccc;--ac:#a78bfa;--ac2:#f472b6;--ok:#34d399;--bad:#f87171;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+#app{max-width:860px;margin:0 auto;padding:20px;min-height:90vh;display:flex;flex-direction:column;justify-content:center}
+h1,h2,h3{margin:.3em 0}.c{text-align:center}.mut{color:var(--mut)}
+.card{background:var(--card);border-radius:16px;padding:18px;margin:10px 0;box-shadow:0 4px 20px #0002}
+button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 20px;margin:4px;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--ac),var(--ac2))}
+button.s{background:var(--card);color:var(--tx);border:2px solid var(--ac)}button.sel{outline:3px solid var(--ac2)}button:disabled{opacity:.4}
+.big{font-size:20px;padding:18px 44px}
+input{font:inherit;padding:10px;border-radius:10px;border:2px solid var(--mut);background:var(--bg);color:var(--tx);max-width:100%}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;justify-content:space-between;border-bottom:1px solid #8884;padding:8px 0}
+.opt{display:block;width:100%;text-align:left;margin:6px 0}
+.welcome{font-size:clamp(32px,8vw,72px);font-weight:900;text-align:center;line-height:1.1}
+.welcome span{display:inline-block;opacity:0;animation:pop .8s forwards;background:linear-gradient(135deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+@keyframes pop{from{opacity:0;transform:translateY(30px) scale(.5)}to{opacity:1;transform:none}}
+.fadeout{animation:out 1s forwards}@keyframes out{to{opacity:0;transform:scale(1.1)}}
+.pulse{animation:pl 1.6s infinite}@keyframes pl{50%{opacity:.4;transform:scale(.97)}}
+.huge{font-size:clamp(48px,14vw,120px);font-weight:900;text-align:center}
+.tabs{display:flex;flex-wrap:wrap;justify-content:center}.ok{color:var(--ok)}.bad{color:var(--bad)}
+.shake{animation:sh .6s}@keyframes sh{25%{transform:translateX(-12px)}75%{transform:translateX(12px)}}
+</style></head>
+<body><div id="app"></div>
+<script>
+const S=["Science","Art","Literature","Sports","Entertainment","History","Geography","Music"];
+const B=[
+[["What planet is known as the Red Planet?",["Venus","Mars","Jupiter","Mercury"],1],["Which gas do plants absorb from the air?",["Oxygen","Nitrogen","Carbon dioxide","Helium"],2],["What is the chemical symbol for gold?",["Au","Ag","Gd","Go"],0],["How many bones are in an adult human body?",["186","206","226","256"],1]],
+[["Who painted the Mona Lisa?",["Michelangelo","Da Vinci","Raphael","Van Gogh"],1],["Who painted The Starry Night?",["Monet","Picasso","Van Gogh","Dalí"],2],["The primary colors are red, blue and…?",["Green","Yellow","Orange","Purple"],1],["Salvador Dalí is linked to which movement?",["Cubism","Surrealism","Impressionism","Pop Art"],1]],
+[["Who wrote Romeo and Juliet?",["Dickens","Shakespeare","Austen","Twain"],1],["Who wrote 1984?",["Huxley","Orwell","Bradbury","Wells"],1],["Which novel opens with “Call me Ishmael”?",["Moby-Dick","Dracula","Emma","Ulysses"],0],["Who wrote Pride and Prejudice?",["Jane Austen","Charlotte Brontë","George Eliot","Mary Shelley"],0]],
+[["How many players per side are on the field in soccer?",["9","10","11","12"],2],["Which country hosted the 2016 Summer Olympics?",["China","Brazil","UK","Japan"],1],["How many points is an NFL touchdown worth?",["3","6","7","1"],1],["In which sport do you slam dunk?",["Volleyball","Tennis","Basketball","Golf"],2]],
+[["Which film has the line “I’ll be back”?",["The Terminator","Rocky","Alien","Predator"],0],["Who directed Jurassic Park?",["Spielberg","Scorsese","Nolan","Cameron"],0],["Which studio made Toy Story?",["DreamWorks","Pixar","Illumination","Ghibli"],1],["Which show features “the Upside Down”?",["Dark","Stranger Things","Lost","Black Mirror"],1]],
+[["In what year did World War II end?",["1943","1945","1947","1950"],1],["Who was the first US president?",["Jefferson","Adams","Washington","Lincoln"],2],["Who built the pyramids at Giza?",["Romans","Greeks","Egyptians","Mayans"],2],["In what year did the Berlin Wall fall?",["1985","1989","1991","1993"],1]],
+[["What is the largest ocean?",["Atlantic","Indian","Arctic","Pacific"],3],["What is the capital of Australia?",["Sydney","Melbourne","Canberra","Perth"],2],["Which river flows through Egypt?",["Nile","Amazon","Danube","Ganges"],0],["On which continent is the Sahara?",["Asia","Africa","Australia","South America"],1]],
+[["How many strings does a standard guitar have?",["4","5","6","8"],2],["Which band released Abbey Road?",["Rolling Stones","The Beatles","Queen","The Who"],1],["Who is the “King of Pop”?",["Elvis Presley","Prince","Michael Jackson","Bono"],2],["Which instrument has 88 keys?",["Organ","Piano","Accordion","Harp"],1]]];
+const $=document.getElementById("app");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const shuf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=rnd(0,i);[a[i],a[j]]=[a[j],a[i]]}return a};
+let db=null,D={},stage="welcome",view=0,R={},P={},me=(location.hash.match(/^#p([0-7])$/)||[])[1];
+const emails=S.map(()=>"popoed69@gmail.com");
+const base=()=>location.href.split("#")[0];
+
+const EMAILS=Array(8).fill("elliotsigal2007@gmail.com"); // order: Science, Art, Literature, Sports, Entertainment, History, Geography, Music
+let PW=sessionStorage.getItem("pw")||"",last="",sentMsg="";
+async function api(action,extra={}){const r=await fetch("/api",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({pw:PW,action,...extra})});if(r.status===401){PW="";sessionStorage.removeItem("pw");throw new Error("pw")}return r.json()}
+function ask(){$.innerHTML='<div class="card c"><h2>Enter the game password</h2><input id="pw" type="password"> <button id="ok">Enter</button></div>';document.getElementById("ok").onclick=()=>{PW=document.getElementById("pw").value;sessionStorage.setItem("pw",PW);boot()}}
+async function boot(){
+  try{const r=await api("get");D=r.d;last=JSON.stringify(D)}catch(e){return ask()}
+  if(me!==undefined)player();else host();
+  setInterval(async()=>{try{const r=await api("get"),t=JSON.stringify(r.d);if(t!==last){last=t;D=r.d;onData()}}catch(e){}},2000);
+}
+function init(){PW?boot():ask()}
+const answered=()=>S.filter((_,i)=>D["a"+i]);
+function onData(){
+  if(me!==undefined){if(P.stale!==(D.game&&D.game.t)||!P.init||D["a"+me]||!(D.game&&D.game.phase==="quiz"))player();return}
+  if(stage==="quiz"){const n=answered().length;if(n===8){stage="reveal";view=0;host()}else host()}
+}
+
+/* ---------- HOST ---------- */
+function host(){
+  if(stage==="welcome"){
+    const w="Welcome to the Montage Games";let i=0;
+    $.innerHTML='<div class="welcome" id="w">'+w.split("").map(ch=>ch===" "?" ":'<span style="animation-delay:'+(i++*.07)+'s">'+ch+'</span>').join("")+'</div>';
+    setTimeout(()=>{const e=document.getElementById("w");if(e)e.classList.add("fadeout")},3800);
+    setTimeout(()=>{stage="start";host()},4800);return}
+  if(stage==="start"){
+    $.innerHTML='<div class="c"><h1>The Montage Games</h1><p class="mut">8 players · 8 subjects · 3 questions each</p><button class="big" id="go">Start</button></div>';
+    document.getElementById("go").onclick=startGame;return}
+  if(stage==="quiz"){
+    const n=answered().length;
+    $.innerHTML='<div class="c"><h2>'+(sentMsg.startsWith("0 ")?"Email problem ⚠️":"Links sent to all players ✉️")+'</h2><p class="mut">'+esc(sentMsg)+'</p><div class="huge">'+n+' / 8</div><p class="mut pulse">Waiting for results…</p><button class="s" id="fill">Test: auto-fill missing players</button></div>';
+    document.getElementById("fill").onclick=()=>S.forEach((_,i)=>{if(!D["a"+i])api("answer",{i,a:[0,1,2].map(()=>rnd(0,3))})});
+    return}
+  if(stage==="reveal"){
+    const i=view,q=D.game.qs[i];
+    $.innerHTML='<h2 class="c">Player '+(i+1)+' of 8 · '+S[i]+'</h2>'+q.map((id,k)=>{const x=B[i][id],a=D["a"+i].a[k];
+      return '<div class="card"><b>'+esc(x[0])+'</b><div class="mut">Answer given: <b style="color:var(--tx)">'+esc(x[1][a])+'</b></div></div>'}).join("")+
+      '<div class="c"><button id="nx">'+(i<7?"Next player":"See results")+'</button></div>';
+    document.getElementById("nx").onclick=()=>{if(i<7)view++;else{stage="results"}host()};return}
+  if(stage==="results"){
+    const w=wrong();
+    $.innerHTML='<div class="c"><h2>Results</h2><div class="huge '+(w.length?"bad":"ok")+'">'+w.length+'</div><h3>of 8 players got a question wrong</h3><button id="nx">Continue</button></div>';
+    document.getElementById("nx").onclick=()=>{if(w.length){stage="chance"}else stage="win";host()};return}
+  if(stage==="chance"){
+    $.innerHTML='<div class="c"><div class="welcome"><span>You have another chance at seeing the montage…</span></div><h2 class="pulse">Please pair up!</h2></div>';
+    setTimeout(()=>{if(stage!=="chance")return;setupDuos();stage="duo";view=0;host()},5000);return}
+  if(stage==="duo"){
+    const d=R.duos[view],t=S[R.target];
+    const hints=[t.length+" letters in their subject","Their subject starts with “"+t[0]+"”","Their subject ends with “"+t[t.length-1]+"”"];
+    $.innerHTML='<h2 class="c">Solve the puzzles to uncover who slipped up</h2><div class="tabs">'+R.duos.map((x,k)=>'<button class="'+(k===view?"":"s")+'" data-t="'+k+'">'+S[x.m[0]]+" + "+S[x.m[1]]+(x.g!==null?" ✔":"")+'</button>').join("")+'</div>'+
+    '<div class="card">'+d.p.map((p,k)=>'<div class="row"><span>'+(k+1)+'. '+p.q+' = ?</span>'+(d.s[k]?'<b class="ok">'+p.a+' → Hint: '+esc(hints[k])+'</b>':'<span><input type="number" id="in'+k+'" style="width:90px"><button data-c="'+k+'">Check</button></span>')+'</div>').join("")+'</div>'+
+    '<div class="card c"><b>Which player got a question wrong?</b><div>'+(d.g!==null?'<p class="mut">Guess locked in.</p>':S.map((s,i)=>'<button class="s" data-g="'+i+'">'+s+'</button>').join(""))+'</div></div>';
+    $.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{view=+b.dataset.t;host()});
+    $.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{const k=+b.dataset.c;if(+document.getElementById("in"+k).value===d.p[k].a){d.s[k]=true;host()}else{b.parentNode.classList.add("shake");setTimeout(()=>b.parentNode.classList.remove("shake"),700)}});
+    $.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{d.g=+b.dataset.g;
+      if(d.g===R.target)stage="win";else if(R.duos.every(x=>x.g!==null))stage="lose";else{const n=R.duos.findIndex(x=>x.g===null);view=n}host()});
+    return}
+  if(stage==="win"){
+    $.innerHTML='<div class="c"><div class="huge ok">🎉</div><h1>You avoided destruction!</h1><div class="card"><h3>🎬 The montage plays</h3><p class="mut">Your montage video will go here.</p></div><button id="nw">New game</button></div>';
+    document.getElementById("nw").onclick=reset;return}
+  if(stage==="lose"){
+    $.innerHTML='<div class="c"><div class="huge bad shake">💥</div><h1>Destruction.</h1><p class="mut">No duo found the player who slipped up.</p><button id="nw">New game</button></div>';
+    document.getElementById("nw").onclick=reset}
+}
+function wrong(){return S.map((_,i)=>i).filter(i=>D.game.qs[i].some((id,k)=>D["a"+i].a[k]!==B[i][id][2]))}
+function setupDuos(){
+  const w=wrong(),order=shuf(S.map((_,i)=>i));
+  R={target:w[rnd(0,w.length-1)],duos:[0,2,4,6].map(k=>{const m=[order[k],order[k+1]];
+    const a=rnd(3,12),b=rnd(3,9),c=rnd(1,20),e=rnd(4,15),f=rnd(2,19),g=rnd(2,9),h=rnd(2,9);
+    return{m,g:null,s:[false,false,false],p:[{q:a+" × "+b+" + "+c,a:a*b+c},{q:e+"² − "+f,a:e*e-f},{q:"("+g+" + "+h+") × "+(g-1),a:(g+h)*(g-1)}]}})};
+}
+async function startGame(){
+  const qs=B.map(b=>shuf(b.map((_,i)=>i)).slice(0,3));
+  const r=await api("start",{qs,emails:EMAILS,names:S});
+  sentMsg=r.sent+" email(s) sent."+(r.failed&&r.failed.length?" Problems: "+r.failed.join(" | "):"");
+  D={game:{phase:"quiz",qs}};last=JSON.stringify(D);stage="quiz";host();
+}
+async function reset(){await api("reset");D={};last="";stage="start";host()}
+
+/* ---------- PLAYER ---------- */
+function player(){
+  const g=D.game;P.init=true;P.stale=g&&g.t;
+  if(!g||g.phase!=="quiz"){P.k=0;P.a=[];$.innerHTML='<div class="c"><h2>Welcome, '+S[me]+' player</h2><p class="mut pulse">Waiting for the host to start…</p></div>';return}
+  if(D["a"+me]){$.innerHTML='<div class="c"><h2>Thanks! You’re done.</h2><p class="mut pulse">Waiting for results…</p></div>';return}
+  P.k=P.k||0;P.a=P.a||[];const k=P.k,x=B[me][g.qs[me][k]];
+  $.innerHTML='<div class="c mut">'+S[me]+' · Question '+(k+1)+' of 3</div><div class="card"><h2>'+esc(x[0])+'</h2>'+x[1].map((o,i)=>'<button class="s opt" data-o="'+i+'">'+esc(o)+'</button>').join("")+'</div><div class="c"><button id="nx" disabled>'+(k<2?"Next":"Submit")+'</button></div>';
+  let pick=null;
+  $.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>{pick=+b.dataset.o;$.querySelectorAll("[data-o]").forEach(y=>y.classList.remove("sel"));b.classList.add("sel");document.getElementById("nx").disabled=false});
+  document.getElementById("nx").onclick=async()=>{P.a[k]=pick;if(k<2){P.k++;player()}else{await api("answer",{i:me,a:P.a});D["a"+me]={a:P.a};player();}};
+}
+init();
+</script></body></html>
